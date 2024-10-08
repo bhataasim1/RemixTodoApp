@@ -34,6 +34,7 @@ export default function Index() {
 
   useEffect(() => {
     const todos = getTodosFromLocalStorage();
+    console.log("todos", todos);
     if (todos) {
       setTodos(todos);
     }
