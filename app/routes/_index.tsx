@@ -6,6 +6,7 @@ import { Search, Plus, ListTodo, CheckCircle2, Clock, Calendar } from "lucide-re
 import { useEffect, useState } from "react";
 import { FilterTodos, Todos } from "../types/types";
 import { TodosCard } from "../components/Todos";
+import { filterTodos, searchTodo } from "../utils/filterTodos";
 
 export const meta: MetaFunction = () => {
   return [
@@ -47,31 +48,7 @@ export default function Index() {
     saveTodosToLocalStorage(deletedTodo);
   }
 
-  const keys: (keyof Pick<Todos, 'title' | 'description'>)[] = ['title', 'description'];
-
-
-  function filterTodos(todos: Todos[], filter: FilterTodos) {
-    switch (filter) {
-      case "all":
-        return todos;
-      case "completed":
-        return todos.filter((todo) => todo.status === "completed");
-      case "pending":
-        return todos.filter((todo) => todo.status === "pending");
-      case "dueDate":
-        return todos.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
-      default:
-        return [];
-    }
-  }
-
-  function searchTodo(todo: Todos[]): Todos[] {
-    return todo.filter((todo) => {
-      return keys.some((key) => todo[key].toLowerCase().includes(query.toLowerCase()));
-    });
-  }
-
-  const filteredTodosData = searchTodo(filterTodos(todos, filteredTodos));
+  const filteredTodosData = searchTodo(filterTodos(todos, filteredTodos), query);
   // console.log("filteredTodosData", filteredTodosData);
 
   return (
