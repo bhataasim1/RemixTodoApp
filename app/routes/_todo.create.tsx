@@ -3,8 +3,9 @@ import { Header } from "../components/Header";
 import { Calendar } from "lucide-react";
 import { ActionFunctionArgs } from "@remix-run/node";
 import { getTodosFromLocalStorage, saveTodosToLocalStorage } from "../utils/todosLocalStorage";
-import { Todos } from "../types/types";
+import { ErrorType, Todos } from "../types/types";
 import { useEffect } from "react";
+import { getCurrentDate, validateInputData } from "../utils/validateInput";
 
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -13,25 +14,14 @@ export async function action({ request }: ActionFunctionArgs) {
   const description = String(formData.get("description"));
   const dueDate = String(formData.get("dueDate"));
 
-  const errors: Record<string, string> = {};
-
-  if (!title) {
-    errors.title = "Title is required";
-  }
-
-  if (!description) {
-    errors.description = "Description is required";
-  }
-
-  if (!dueDate) {
-    errors.dueDate = "Due date is required";
-  }
+  const errors: ErrorType = validateInputData({ title, description, dueDate });
+  let newTodo: Todos | object = {};
 
   if (Object.keys(errors).length > 0) {
-    return json({ errors }, { status: 400 });
+    return json({ errors, newTodo });
   }
 
-  const newTodo: Todos = {
+  newTodo = {
     id: Math.floor(Math.random() * 1000),
     title,
     description,
@@ -40,7 +30,7 @@ export async function action({ request }: ActionFunctionArgs) {
     dueDate,
   }
 
-  return json(newTodo)
+  return json({ newTodo, errors });
 }
 
 export default function TodoCreate() {
@@ -49,9 +39,10 @@ export default function TodoCreate() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (actionData) {
+    if (actionData?.newTodo && Object.keys(actionData.newTodo).length > 0) {
       const todos: Todos[] = getTodosFromLocalStorage();
-      todos.push(actionData as unknown as Todos); // need to fix types here
+      // console.log("create", todos);
+      todos.push(actionData.newTodo as unknown as Todos); // need to fix types here
       saveTodosToLocalStorage(todos);
       navigate('/');
     }
@@ -82,6 +73,10 @@ export default function TodoCreate() {
                 className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none transition-all"
                 placeholder="Enter todo title"
               />
+
+              {actionData?.errors?.title && (
+                <p className="text-red-500 text-sm mt-1">{actionData.errors.title}</p>
+              )}
             </div>
 
             <div>
@@ -92,9 +87,14 @@ export default function TodoCreate() {
                 id="description"
                 name="description"
                 rows={4}
+                required
                 className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none transition-all resize-none"
                 placeholder="Enter todo description"
               />
+
+              {actionData?.errors?.description && (
+                <p className="text-red-500 text-sm mt-1">{actionData.errors.description}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -108,10 +108,14 @@ export default function TodoCreate() {
                     type="date"
                     id="dueDate"
                     name="dueDate"
-                    defaultValue={new Date().toISOString().split("T")[0]}
+                    defaultValue={getCurrentDate()}
                     required
                     className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none transition-all"
                   />
+
+                  {actionData?.errors?.dueDate && (
+                    <p className="text-red-500 text-sm mt-1">{actionData.errors.dueDate}</p>
+                  )}
                 </div>
               </div>
             </div>
