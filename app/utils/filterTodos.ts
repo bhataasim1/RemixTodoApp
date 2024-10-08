@@ -19,6 +19,6 @@ export function filterTodos(todos: Todos[], filter: FilterTodos) {
 
 export function searchTodo(todo: Todos[], query: string): Todos[] {
   return todo.filter((todo) => {
-    return keys.some((key) => todo[key].toLowerCase().includes(query.toLowerCase()));
+    return keys.some((key) => todo[key]?.toLowerCase().includes(query?.toLowerCase()));
   });
 }
