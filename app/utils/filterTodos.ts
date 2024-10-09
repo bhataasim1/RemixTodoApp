@@ -10,8 +10,10 @@ export function filterTodos(todos: Todos[], filter: FilterTodos) {
       return todos.filter((todo) => todo.status === "completed");
     case "pending":
       return todos.filter((todo) => todo.status === "pending");
-    case "dueDate":
-      return todos.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+    case "dueDate": {
+      const inCompletedTodos = todos.filter((todo) => todo.status !== "completed");
+      return inCompletedTodos.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+    }
     default:
       return [];
   }
