@@ -84,25 +84,25 @@ export default function Index() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           <button
             onClick={() => setFilteredTodos("all")}
-            className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition-all font-medium">
+            className={`flex items-center justify-center gap-2 p-3 rounded-lg bg-white border border-gray-200 ${filteredTodos === "all" && "border-purple-400 bg-purple-50 "} hover:border-purple-400 hover:bg-purple-50 transition-all font-medium`}>
             <ListTodo className="h-5 w-5 text-purple-600" />
             <span>All</span>
           </button>
           <button
             onClick={() => setFilteredTodos("completed")}
-            className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white border border-gray-200 hover:border-green-400 hover:bg-green-50 transition-all font-medium">
+            className={`flex items-center justify-center gap-2 p-3 rounded-lg bg-white border border-gray-200 ${filteredTodos === "completed" && "border-green-400 bg-green-50"} hover:border-green-400 hover:bg-green-50 transition-all font-medium`}>
             <CheckCircle2 className="h-5 w-5 text-green-600" />
             <span>Completed</span>
           </button>
           <button
             onClick={() => setFilteredTodos("pending")}
-            className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white border border-gray-200 hover:border-yellow-400 hover:bg-yellow-50 transition-all font-medium">
+            className={`flex items-center justify-center gap-2 p-3 rounded-lg bg-white border border-gray-200 ${filteredTodos === "pending" && "border-yellow-400 bg-yellow-50"} hover:border-yellow-400 hover:bg-yellow-50 transition-all font-medium`}>
             <Clock className="h-5 w-5 text-yellow-600" />
             <span>Pending</span>
           </button>
           <button
             onClick={() => setFilteredTodos("dueDate")}
-            className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white border border-gray-200 hover:border-red-400 hover:bg-red-50 transition-all font-medium">
+            className={`flex items-center justify-center gap-2 p-3 rounded-lg bg-white border border-gray-200 ${filteredTodos === "dueDate" && "border-red-400 bg-red-50"} hover:border-red-400 hover:bg-red-50 transition-all font-medium`}>
             <Calendar className="h-5 w-5 text-red-600" />
             <span>Due Date</span>
           </button>
@@ -112,7 +112,7 @@ export default function Index() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           {filteredTodosData.length === 0 ? (
             <div className="text-center py-12">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No todos yet</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">OOPS!! No todos yet</h3>
               <p className="text-gray-500">Create your first todo to get started!</p>
             </div>
           ) : (
