@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Todos } from "../types/types";
-import { Trash2, Calendar, CheckCircle, Circle } from "lucide-react";
+import { Trash2, Calendar, CheckCircle, Circle, Edit } from "lucide-react";
 import { getTodosFromLocalStorage, saveTodosToLocalStorage } from "../utils/todosLocalStorage";
 import { formatDate } from "../utils/formateDate";
+import { useNavigate } from "@remix-run/react";
 
 interface TodosProps {
   todo: Todos;
@@ -13,6 +14,8 @@ interface TodosProps {
 export const TodosCard = ({ todo, setTodo, deleteTodo }: TodosProps) => {
   const [completed, setCompleted] = useState(todo.status === "completed");
   const [isHovered, setIsHovered] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleStatusChange = () => {
     const newStatus = todo.status === "completed" ? "pending" : "completed";
@@ -59,13 +62,22 @@ export const TodosCard = ({ todo, setTodo, deleteTodo }: TodosProps) => {
             </div>
 
             {/* Delete button - visible on hover */}
-            <button
-              onClick={() => deleteTodo(todo.id)}
-              className={`flex-shrink-0 text-gray-400 hover:text-red-500 transition-colors ${isHovered ? 'opacity-100' : 'opacity-0'
-                }`}
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
+            <div className="flex flex-col gap-5">
+              <button
+                onClick={() => deleteTodo(todo.id)}
+                className={`flex-shrink-0 text-gray-400 hover:text-red-500 transition-colors ${isHovered ? 'opacity-100' : 'opacity-0'
+                  }`}
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => navigate(`/edit/${todo.id}`)}
+                className={`flex-shrink-0 text-gray-400 hover:text-red-500 transition-colors ${isHovered ? 'opacity-100' : 'opacity-0'
+                  }`}
+              >
+                <Edit className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Meta information */}
