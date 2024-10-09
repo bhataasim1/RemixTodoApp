@@ -10,11 +10,13 @@ export function getCurrentDate() {
 }
 
 function isValidDate(dueDate: string): boolean {
-  const currentDate = new Date().toISOString();
-
-  currentDate.slice(0, 10);
-
-  return currentDate > dueDate;
+  // console.log(dueDate);
+  const currentDate = new Date().toISOString().split("T")[0];
+  
+  // currentDate.slice(0, 10);
+  // console.log(currentDate);
+  
+  return dueDate < currentDate;
 }
 
 export function validateInputData(inputData: InputData) {
