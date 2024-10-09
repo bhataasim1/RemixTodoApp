@@ -72,7 +72,7 @@ export const TodosCard = ({ todo, setTodo, deleteTodo }: TodosProps) => {
               </button>
               <button
                 onClick={() => navigate(`/edit/${todo.id}`)}
-                className={`flex-shrink-0 text-gray-400 hover:text-red-500 transition-colors ${isHovered ? 'opacity-100' : 'opacity-0'
+                className={`flex-shrink-0 text-yellow-400 hover:text-orange-500 transition-colors ${isHovered ? 'opacity-100' : 'opacity-0'
                   }`}
               >
                 <Edit className="w-5 h-5" />
