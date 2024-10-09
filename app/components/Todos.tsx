@@ -70,13 +70,15 @@ export const TodosCard = ({ todo, setTodo, deleteTodo }: TodosProps) => {
               >
                 <Trash2 className="w-5 h-5" />
               </button>
-              <button
-                onClick={() => navigate(`/edit/${todo.id}`)}
-                className={`flex-shrink-0 text-yellow-400 hover:text-orange-500 transition-colors ${isHovered ? 'opacity-100' : 'opacity-0'
-                  }`}
-              >
-                <Edit className="w-5 h-5" />
-              </button>
+              {todo.status !== "completed" && (
+                <button
+                  onClick={() => navigate(`/edit/${todo.id}`)}
+                  className={`flex-shrink-0 text-yellow-400 hover:text-orange-500 transition-colors ${isHovered ? 'opacity-100' : 'opacity-0'
+                    }`}
+                >
+                  <Edit className="w-5 h-5" />
+                </button>
+              )}
             </div>
           </div>
 
