@@ -1,5 +1,5 @@
-import type { MetaFunction } from "@remix-run/node";
-import { Link } from "@remix-run/react";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import { Link, useLoaderData, useNavigate } from "@remix-run/react";
 import { Header } from "../components/Header";
 import { getTodosFromLocalStorage, saveTodosToLocalStorage } from "../utils/todosLocalStorage";
 import { Search, Plus, ListTodo, CheckCircle2, Clock, Calendar } from "lucide-react";
@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { FilterTodos, Todos } from "../types/types";
 import { TodosCard } from "../components/Todos";
 import { filterTodos, searchTodo } from "../utils/filterTodos";
+import { getSession } from "../session";
 
 export const meta: MetaFunction = () => {
   return [
@@ -15,17 +16,17 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-// export async function loader() {
-//   if (typeof window !== "undefined") {
-//     const todos = getTodosFromLocalStorage();
-//     return json(todos);
-//   }
-//   return [];
-// }
+export async function loader({ request }: LoaderFunctionArgs) {
+  const session = await getSession(request.headers.get("Cookie"));
+  const userId = session.get("userId");
+  return userId || null;
+}
 
 export default function Index() {
-  // const todos = useLoaderData<typeof loader>();
-  // console.log(todos);
+  const userId = useLoaderData<typeof loader>();
+  const navigate = useNavigate();
+  // console.log(userId);
+
   const [todos, setTodos] = useState<Todos[]>([]);
   const [filteredTodos, setFilteredTodos] = useState<FilterTodos>("all");
   const [query, setQuery] = useState<string>("");
@@ -35,10 +36,14 @@ export default function Index() {
   useEffect(() => {
     const todos = getTodosFromLocalStorage();
     // console.log("todos", todos);
+
+    if (userId === null) {
+      navigate("/login");
+    }
     if (todos) {
       setTodos(todos);
     }
-  }, []);
+  }, [userId]);
 
   function handleDeleteTodo(id: number) {
     if (!confirm("Are you sure you want to delete this todo?")) return;
@@ -54,7 +59,7 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <Header userId={userId} />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Search and Create Section */}
