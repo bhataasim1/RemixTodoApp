@@ -5,6 +5,8 @@ export type Todos = {
   status: "pending" | "completed";
   createdAt: Date;
   dueDate: string;
+
+  userId: string;
 };
 
 export type FilterTodos = "all" | "pending" | "completed" | "dueDate";
