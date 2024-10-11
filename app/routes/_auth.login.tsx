@@ -1,25 +1,36 @@
 import { Lock } from "lucide-react";
 import AuthForm from "../components/auth/auth-form";
 import { ActionFunctionArgs } from "@remix-run/node";
-import directusClient from "../.server/directus.server";
 import { redirect } from "@remix-run/react";
 import { commitSession, getSession } from "../sessions";
-import { readMe } from "@directus/sdk";
+import { AuthService } from "../.server/auth/AuthService";
+
+const authService = new AuthService();
 
 export async function action({ request }: ActionFunctionArgs) {
 
   const session = await getSession(request.headers.get("Cookie"));
-  console.log(session);
+  // console.log(session);
 
   const formData = await request.formData();
   const email = String(formData.get("email"))
   const password = String(formData.get("password"))
 
-  const res = await directusClient.login(email, password);
-  console.log(res);
+  const res = await authService.loginUser({ email, password });
+  // console.log(res);
+  
+  if (!res.access_token) {
+    session.flash("error", "Invalid email or password");
+
+    return redirect("/login", {
+      headers: {
+        "Set-Cookie": await commitSession(session),
+      },
+    });
+  }
+
   try {
-    await directusClient.setToken(res.access_token);
-    const user = await directusClient.request(readMe());
+    const user = await authService.readMe(res.access_token);
     const userId = user.id;
     const first_name = user.first_name;
     const last_name = user.last_name;
