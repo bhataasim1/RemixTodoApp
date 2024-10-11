@@ -1,10 +1,11 @@
-import directusClient from "../.server/directus.server";
 import AuthForm from "../components/auth/auth-form";
 import { UserCircle } from "lucide-react";
-import { createUser } from "@directus/sdk";
 import { redirect } from "@remix-run/react";
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { getSession } from "../sessions";
+import { AuthService } from "../.server/auth/AuthService";
+
+const authService = new AuthService();
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = new URLSearchParams(await request.text());
@@ -13,10 +14,12 @@ export async function action({ request }: ActionFunctionArgs) {
   const email = formData.get("email");
   const password = formData.get("password");
 
-  const userRole = process.env.USER_ROLE_ID;
+  if (!first_name || !last_name || !email || !password) {
+    return redirect("/signup");
+  }
 
   try {
-    await directusClient.request(createUser({ first_name, last_name, email, password, role: userRole }));
+    await authService.registerUser({ first_name, last_name, email, password });
     return redirect("/login");
   } catch (error) {
     return redirect("/signup");
