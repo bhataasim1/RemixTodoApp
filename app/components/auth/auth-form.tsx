@@ -1,11 +1,13 @@
 import { Form, Link } from "@remix-run/react";
 import { Mail, Lock } from "lucide-react";
+import { User } from "../../types/types";
 
 type AuthFormProps = {
   type: "login" | "signup";
+  errors?: Partial<User>;
 };
 
-export default function AuthForm({ type }: AuthFormProps) {
+export default function AuthForm({ type, errors }: AuthFormProps) {
   return (
     <div className="w-full max-w-full">
       <div className="text-center mb-8">
@@ -44,7 +46,13 @@ export default function AuthForm({ type }: AuthFormProps) {
                       className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none transition-all"
                       placeholder="Enter your first name"
                     />
+
                   </div>
+                  {
+                    errors?.first_name && (
+                      <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>
+                    )
+                  }
                 </div>
                 <div>
                   <label
@@ -63,7 +71,13 @@ export default function AuthForm({ type }: AuthFormProps) {
                       className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none transition-all"
                       placeholder="Enter your last name"
                     />
+
                   </div>
+                  {
+                    errors?.last_name && (
+                      <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>
+                    )
+                  }
                 </div>
               </div>
             )
@@ -86,6 +100,11 @@ export default function AuthForm({ type }: AuthFormProps) {
                 placeholder="Enter your email"
               />
             </div>
+            {
+              errors?.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )
+            }
           </div>
 
           <div>
@@ -106,6 +125,11 @@ export default function AuthForm({ type }: AuthFormProps) {
                 placeholder="Enter your password"
               />
             </div>
+            {
+              errors?.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )
+            }
           </div>
         </div>
 
