@@ -1,11 +1,14 @@
-import { Form, json, useActionData, useNavigate } from "@remix-run/react";
+import { Form, json, redirect, useActionData } from "@remix-run/react";
 import { Header } from "../components/Header";
 import { Calendar } from "lucide-react";
 import { ActionFunctionArgs } from "@remix-run/node";
-import { getTodosFromLocalStorage, saveTodosToLocalStorage } from "../utils/todosLocalStorage";
-import { ErrorType, Todos } from "../types/types";
-import { useEffect } from "react";
+import { ErrorType } from "../types/types";
 import { getCurrentDate, validateInputData } from "../utils/validateInput";
+
+import { TodosService } from "../.server/todos/todos.server";
+import { getSession } from "../sessions";
+
+const todosService = new TodosService();
 
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -14,40 +17,26 @@ export async function action({ request }: ActionFunctionArgs) {
   const description = String(formData.get("description"));
   const dueDate = String(formData.get("dueDate"));
 
+  const session = await getSession(request.headers.get("Cookie"));
+  const userId = session.get("userId");
+
+  if (!userId) {
+    return redirect('/login');
+  }
+
   const errors: ErrorType = validateInputData({ title, description, dueDate });
-  let newTodo: Todos | object = {};
 
   if (Object.keys(errors).length > 0) {
-    return json({ errors, newTodo });
+    return json({errors});
   }
 
-  newTodo = {
-    id: Math.floor(Math.random() * 1000),
-    title,
-    description,
-    status: 'pending',
-    createdAt: new Date(),
-    dueDate,
-  }
-
-  return json({ newTodo, errors });
+  await todosService.addTodo({title, description, dueDate, userId});
+  return redirect('/');
 }
 
 export default function TodoCreate() {
   const actionData = useActionData<typeof action>();
-  // console.log(actionData);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (actionData?.newTodo && Object.keys(actionData.newTodo).length > 0) {
-      const todos: Todos[] = getTodosFromLocalStorage();
-      // console.log("create", todos);
-      todos.push(actionData.newTodo as unknown as Todos); // need to fix types here
-      saveTodosToLocalStorage(todos);
-      navigate('/');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionData]);
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -74,7 +63,7 @@ export default function TodoCreate() {
                 placeholder="Enter todo title"
               />
 
-              {actionData?.errors?.title && (
+              {actionData?.errors && (
                 <p className="text-red-500 text-sm mt-1">{actionData.errors.title}</p>
               )}
             </div>
