@@ -1,3 +1,5 @@
+import { User } from "../types/types";
+
 type InputData = {
   title: string;
   description: string;
@@ -12,10 +14,10 @@ export function getCurrentDate() {
 function isValidDate(dueDate: string): boolean {
   // console.log(dueDate);
   const currentDate = new Date().toISOString().split("T")[0];
-  
+
   // currentDate.slice(0, 10);
   // console.log(currentDate);
-  
+
   return dueDate < currentDate;
 }
 
@@ -50,4 +52,52 @@ export function validateInputData(inputData: InputData) {
   }
 
   return {};
+}
+
+export function validateAuthInputs(inputData: Pick<User, "first_name" | "last_name" | "email" | "password">) {
+  const errors: Partial<User> = {};
+
+  if (!inputData.first_name) {
+    errors.first_name = "First name is required";
+  }
+
+  if (inputData.first_name.length < 3) {
+    errors.first_name = "First name must be at least 3 characters";
+  }
+
+  if (!inputData.last_name) {
+    errors.last_name = "Last name is required";
+  }
+
+  if (inputData.last_name.length < 3) {
+    errors.last_name = "Last name must be at least 3 characters";
+  }
+
+
+  if (!inputData.email) {
+    errors.email = "Email is required";
+  }
+
+  if (!isEmailValid(inputData.email)) {
+    errors.email = "Email is invalid";
+  }
+
+  if (!inputData.password) {
+    errors.password = "Password is required";
+  }
+
+  if (inputData.password.length < 6) {
+    errors.password = "Password must be at least 6 characters";
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return errors;
+  }
+
+  return {};
+}
+
+function isEmailValid(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
 }
