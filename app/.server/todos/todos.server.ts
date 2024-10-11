@@ -1,7 +1,7 @@
 
 import { Todos } from "../../types/types";
 import directusClient from "../directus.server"
-import { createItem, deleteItem, readItem, updateItem } from "@directus/sdk";
+import { createItem, deleteItem, readItem, readItems, updateItem } from "@directus/sdk";
 
 type AddTodo = Pick<Todos, "title" | "description" | "dueDate" | 'userId'>;
 
@@ -11,12 +11,13 @@ export class TodosService {
   constructor() {
     this.client = directusClient;
     this.addTodo = this.addTodo.bind(this);
-    this.getTodo = this.getTodo.bind(this);
     this.editTodo = this.editTodo.bind(this);
     this.deleteTodo = this.deleteTodo.bind(this);
+    this.getTodosOfUser = this.getTodosOfUser.bind(this);
   }
 
   async addTodo(todo: AddTodo) {
+    // console.log(todo);
     try {
       const response = await this.client.request(
         createItem("Todos", {
@@ -25,22 +26,49 @@ export class TodosService {
           createdAt: new Date()
         })
       )
+      // console.log(response);
 
       return response;
     } catch (error) {
-      console.error(error);
+      // console.error(error);
       throw new Error("Failed to add todo");
     }
   }
 
-  async getTodo(todoId: string): Promise<Todos> {
+  async getUserTodo(userId: string, todoId: string): Promise<Todos> {
     try {
-      return await this.client.request(readItem("Todos", todoId));
+      return await this.client.request(
+        readItem("Todos", todoId, {
+          filter: {
+            userId: {
+              _eq: userId
+            }
+          }
+        })
+      );
     } catch (error) {
       console.error(error);
       throw new Error("Failed to get todo");
     }
   }
+
+  async getTodosOfUser(userId: string): Promise<Todos[]> {
+    try {
+      return await this.client.request(
+        readItems("Todos", {
+          filter: {
+            userId: {
+              _eq: userId
+            }
+          }
+        })
+      );
+    } catch (error) {
+      console.error(error);
+      throw new Error("Failed to get todos");
+    }
+  }
+
 
   async editTodo(todoId: string, todo: Partial<Todos>) {
     try {
