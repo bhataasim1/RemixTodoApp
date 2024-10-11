@@ -98,6 +98,6 @@ export function validateAuthInputs(inputData: Pick<User, "first_name" | "last_na
 }
 
 function isEmailValid(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  // Regex by AI Copilot
   return emailRegex.test(email);
 }
