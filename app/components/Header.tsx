@@ -1,4 +1,5 @@
 import { Link, useFetcher } from "@remix-run/react"
+import { LogOutIcon } from "lucide-react";
 
 export const Header = ({ userId }: { userId?: string | null }) => {
   const fetcher = useFetcher();
@@ -10,7 +11,12 @@ export const Header = ({ userId }: { userId?: string | null }) => {
       <div>
         {userId && (
           <fetcher.Form method="post" action="/logout">
-            <button type="submit" className="text-white font-medium">Logout</button>
+            <button
+              type="submit"
+              className="text-white font-medium bg-red-500 px-3 py-2 rounded-xl hover:bg-red-600 transition-all flex items-center">
+              Logout
+              <LogOutIcon className="w-5 h-5 ml-2" />
+            </button>
           </fetcher.Form>
         )}
       </div>
