@@ -4,7 +4,7 @@ import { UserCircle } from "lucide-react";
 import { createUser } from "@directus/sdk";
 import { redirect } from "@remix-run/react";
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { getSession } from "../session";
+import { getSession } from "../sessions";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = new URLSearchParams(await request.text());
