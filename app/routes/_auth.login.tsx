@@ -1,9 +1,9 @@
 import { Lock } from "lucide-react";
 import AuthForm from "../components/auth/auth-form";
-import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
+import { ActionFunctionArgs } from "@remix-run/node";
 import directusClient from "../.server/directus.server";
 import { redirect } from "@remix-run/react";
-import { commitSession, getSession } from "../session";
+import { commitSession, getSession } from "../sessions";
 import { readMe } from "@directus/sdk";
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -16,6 +16,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const password = String(formData.get("password"))
 
   const res = await directusClient.login(email, password);
+  console.log(res);
   try {
     await directusClient.setToken(res.access_token);
     const user = await directusClient.request(readMe());
@@ -59,12 +60,12 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 }
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  const session = await getSession(request.headers.get("Cookie"));
-  const userId = session.get("userId");
-  // console.log("userId", userId);
-  return userId ? redirect("/") : null;
-}
+// export async function loader({ request }: LoaderFunctionArgs) {
+//   const session = await getSession(request.headers.get("Cookie"));
+//   const userId = session.get("userId");
+//   // console.log("userId", userId);
+//   return userId ? redirect("/") : null;
+// }
 
 export default function LoginPage() {
   return (
