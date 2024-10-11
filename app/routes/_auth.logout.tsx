@@ -11,7 +11,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if (refresh_token) {
     try {
-      await authService.logoutUser(refresh_token);
+      await authService.logoutUser(refresh_token, "json"); // pass the second argument (mode) as "json" or "cookie" or "session"
 
       return redirect("/login", {
         headers: {
