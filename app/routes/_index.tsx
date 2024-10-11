@@ -1,13 +1,15 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { Link, useLoaderData, useNavigate } from "@remix-run/react";
+import { Link, redirect, useLoaderData } from "@remix-run/react";
 import { Header } from "../components/Header";
-import { getTodosFromLocalStorage, saveTodosToLocalStorage } from "../utils/todosLocalStorage";
 import { Search, Plus, ListTodo, CheckCircle2, Clock, Calendar } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FilterTodos, Todos } from "../types/types";
 import { TodosCard } from "../components/Todos";
 import { filterTodos, searchTodo } from "../utils/filterTodos";
-import { getSession } from "../session";
+import { getSession } from "../sessions";
+import { TodosService } from "../.server/todos/todos.server";
+
+const todosService = new TodosService();
 
 export const meta: MetaFunction = () => {
   return [
@@ -19,42 +21,35 @@ export const meta: MetaFunction = () => {
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get("Cookie"));
   const userId = session.get("userId");
-  return userId || null;
+
+  if (!userId) {
+    return redirect("/login");
+  }
+
+  try {
+    const todos = await todosService.getTodosOfUser(userId);
+
+    return {
+      userId,
+      todos: todos as Todos[] || []
+    };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to get todos");
+  }
 }
 
 export default function Index() {
-  const userId = useLoaderData<typeof loader>();
-  const navigate = useNavigate();
-  // console.log(userId);
-
-  const [todos, setTodos] = useState<Todos[]>([]);
+  const { userId, todos } = useLoaderData<typeof loader>();
   const [filteredTodos, setFilteredTodos] = useState<FilterTodos>("all");
   const [query, setQuery] = useState<string>("");
 
-  // console.log("todos", todos);
+  const todosWithDate = todos.map(todo => ({
+    ...todo,
+    createdAt: new Date(todo.createdAt),
+  }));
 
-  useEffect(() => {
-    const todos = getTodosFromLocalStorage();
-    // console.log("todos", todos);
-
-    if (userId === null) {
-      navigate("/login");
-    }
-    if (todos) {
-      setTodos(todos);
-    }
-  }, [userId]);
-
-  function handleDeleteTodo(id: number) {
-    if (!confirm("Are you sure you want to delete this todo?")) return;
-
-    const deletedTodo = todos.filter((todo) => todo.id !== id);
-
-    setTodos(deletedTodo);
-    saveTodosToLocalStorage(deletedTodo);
-  }
-
-  const filteredTodosData = searchTodo(filterTodos(todos, filteredTodos), query);
+  const filteredTodosData = searchTodo(filterTodos(todosWithDate, filteredTodos), query);
   // console.log("filteredTodosData", filteredTodosData);
 
   return (
@@ -123,7 +118,7 @@ export default function Index() {
           ) : (
             <div className="space-y-4">
               {filteredTodosData.map((todo) => (
-                <TodosCard key={todo.id} todo={todo} setTodo={setTodos} deleteTodo={handleDeleteTodo} />
+                <TodosCard key={todo.id} todo={todo} />
               ))}
             </div>
           )}
