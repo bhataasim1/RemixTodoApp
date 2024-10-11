@@ -1,64 +1,63 @@
-import { Form, json, useActionData, useLoaderData, useNavigate } from "@remix-run/react";
+import { Form, json, redirect, useActionData, useLoaderData } from "@remix-run/react";
 import { Header } from "../components/Header";
 import { Calendar } from "lucide-react";
 import { ActionFunctionArgs } from "@remix-run/node";
-import { getTodosFromLocalStorage, saveTodosToLocalStorage } from "../utils/todosLocalStorage";
 import { ErrorType, Todos } from "../types/types";
-import { useEffect } from "react";
 import { validateInputData } from "../utils/validateInput";
+import { getSession } from "../sessions";
+import { TodosService } from "../.server/todos/todos.server";
+
+const todoService = new TodosService();
 
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request, params }: ActionFunctionArgs) {
+
+  const session = await getSession(request.headers.get("Cookie"));
+  const userId = session.get("userId");
+
+  if (!userId) {
+    return redirect('/login');
+  }
+
+  const todoId = params.todoId;
+
   const formData = await request.formData();
   const title = String(formData.get("title"));
   const description = String(formData.get("description"));
   const dueDate = String(formData.get("dueDate"));
 
   const errors: ErrorType = validateInputData({ title, description, dueDate });
-  let updatedTodo: Todos | object = {};
 
   if (Object.keys(errors).length > 0) {
-    return json({ errors, updatedTodo });
+    return json({ errors });
   }
 
-  updatedTodo = {
-    id: Math.floor(Math.random() * 1000),
-    title,
-    description,
-    status: 'pending',
-    createdAt: new Date(),
-    dueDate,
+  if (todoId) {
+    await todoService.editTodo(todoId, { title, description, dueDate, userId });
   }
 
-  return json({ updatedTodo, errors });
+
+  return redirect('/');
 }
 
-export async function clientLoader({ params }: ActionFunctionArgs) {
-  const todos: Todos[] = getTodosFromLocalStorage();
-  const todo = todos.find((todo) => todo.id === Number(params.todoId));
-  return json(todo);
+export async function loader({ params, request }: ActionFunctionArgs) {
+  const session = await getSession(request.headers.get("Cookie"));
+  const userId = session.get("userId");
+  const todoId = params.todoId;
+
+  if (todoId && userId) {
+    const todo = await todoService.getUserTodo(userId, todoId);
+    return json(todo);
+  }
+
+  return redirect('/');
 }
 
 
 export default function EditTodo() {
   const actionData = useActionData<typeof action>();
-  // console.log(actionData);
-  const navigate = useNavigate();
-
   const loaderData = useLoaderData<Todos>();
-  // console.log(loaderData);
 
-  useEffect(() => {
-    if (actionData?.updatedTodo && Object.keys(actionData.updatedTodo).length > 0) {
-      const todos: Todos[] = getTodosFromLocalStorage();
-      const updatedTodos = todos.map((todo) =>
-        todo.id === loaderData.id ? actionData.updatedTodo : todo
-      );
-      saveTodosToLocalStorage(updatedTodos as Todos[]);
-      navigate('/');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionData]);
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
