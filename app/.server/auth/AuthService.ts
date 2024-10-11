@@ -1,4 +1,4 @@
-import { User } from "../../types/types";
+import { LogoutMode, User } from "../../types/types";
 import { BaseService } from "../todos/BaseService.server";
 import { createUser, logout, readMe } from "@directus/sdk";
 
@@ -24,8 +24,9 @@ export class AuthService extends BaseService {
     return await this.directusClient.login(user.email, user.password);
   }
 
-  async logoutUser(refresh_token: string) {
-    return await this.directusClient.request(logout(refresh_token));
+  // taking mode by default as "json"
+  async logoutUser(refresh_token: string, mode: LogoutMode = "json") {
+    return await this.directusClient.request(logout(refresh_token, mode));
   }
 
   async readMe(access_token: string) {
