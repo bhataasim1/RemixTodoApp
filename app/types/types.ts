@@ -28,3 +28,5 @@ export type User = {
 
 export type AddTodo = Pick<Todos, "title" | "description" | "dueDate" | 'userId'>;
 export type Collection = "Todos";
+
+export type LogoutMode = 'json' | 'cookie' | 'session';
