@@ -1,9 +1,11 @@
 import AuthForm from "../components/auth/auth-form";
 import { UserCircle } from "lucide-react";
-import { redirect } from "@remix-run/react";
+import { json, redirect, useActionData } from "@remix-run/react";
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { getSession } from "../sessions";
 import { AuthService } from "../.server/auth/AuthService";
+import { User } from "../types/types";
+import { validateAuthInputs } from "../utils/validateInput";
 
 const authService = new AuthService();
 
@@ -14,8 +16,15 @@ export async function action({ request }: ActionFunctionArgs) {
   const email = formData.get("email");
   const password = formData.get("password");
 
+
   if (!first_name || !last_name || !email || !password) {
     return redirect("/signup");
+  }
+
+  const errors: Partial<User> = validateAuthInputs({ first_name, last_name, email, password });
+
+  if (Object.keys(errors).length > 0) {
+    return json({ errors });
   }
 
   try {
@@ -33,6 +42,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function SignupPage() {
+  const actionData = useActionData<typeof action>();
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -45,7 +56,7 @@ export default function SignupPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-sm sm:rounded-lg sm:px-10">
-          <AuthForm type="signup" />
+          <AuthForm type="signup" errors={actionData?.errors} />
         </div>
       </div>
     </div>
