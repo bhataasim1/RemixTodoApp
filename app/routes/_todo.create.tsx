@@ -3,11 +3,10 @@ import { Header } from "../components/Header";
 import { Calendar } from "lucide-react";
 import { ActionFunctionArgs } from "@remix-run/node";
 import { ErrorType } from "../types/types";
-// import { useEffect } from "react";
 import { getCurrentDate, validateInputData } from "../utils/validateInput";
 
 import { TodosService } from "../.server/todos/todos.server";
-import { getSession } from "../session";
+import { getSession } from "../sessions";
 
 const todosService = new TodosService();
 
@@ -26,42 +25,18 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   const errors: ErrorType = validateInputData({ title, description, dueDate });
-  // let newTodo: Todos | object = {};
 
   if (Object.keys(errors).length > 0) {
     return json({errors});
   }
 
-  // newTodo = {
-  //   id: Math.floor(Math.random() * 1000),
-  //   title,
-  //   description,
-  //   status: 'pending',
-  //   createdAt: new Date(),
-  //   dueDate,
-  // }
-
   await todosService.addTodo({title, description, dueDate, userId});
-
-  // return json({ newTodo, errors });
   return redirect('/');
 }
 
 export default function TodoCreate() {
   const actionData = useActionData<typeof action>();
-  // console.log(actionData);
-  // const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   if (actionData?.newTodo && Object.keys(actionData.newTodo).length > 0) {
-  //     const todos: Todos[] = getTodosFromLocalStorage();
-  //     // console.log("create", todos);
-  //     todos.push(actionData.newTodo as unknown as Todos); // need to fix types here
-  //     saveTodosToLocalStorage(todos);
-  //     navigate('/');
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [actionData]);
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
