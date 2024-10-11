@@ -1,34 +1,50 @@
 import { useState } from "react";
 import { Todos } from "../types/types";
 import { Trash2, Calendar, CheckCircle, Circle, Edit } from "lucide-react";
-import { getTodosFromLocalStorage, saveTodosToLocalStorage } from "../utils/todosLocalStorage";
+// import { getTodosFromLocalStorage, saveTodosToLocalStorage } from "../utils/todosLocalStorage";
 import { formatDate } from "../utils/formateDate";
-import { useNavigate } from "@remix-run/react";
+import { useNavigate, useSubmit } from "@remix-run/react";
 
 interface TodosProps {
   todo: Todos;
-  setTodo: React.Dispatch<React.SetStateAction<Todos[]>>;
-  deleteTodo: (id: number) => void;
+  setTodo?: React.Dispatch<React.SetStateAction<Todos[]>>;
+  deleteTodo?: (id: number) => void;
 }
 
-export const TodosCard = ({ todo, setTodo, deleteTodo }: TodosProps) => {
+export const TodosCard = ({ todo }: TodosProps) => {
   const [completed, setCompleted] = useState(todo.status === "completed");
   const [isHovered, setIsHovered] = useState(false);
+  const submit = useSubmit();
 
   const navigate = useNavigate();
 
   const handleStatusChange = () => {
-    const newStatus = todo.status === "completed" ? "pending" : "completed";
+    const newStatus: Todos["status"] = todo.status === "completed" ? "pending" : "completed";
     setCompleted(newStatus === "completed");
 
-    const storedTasks = getTodosFromLocalStorage();
-    const updatedTasks = storedTasks.map((item: Todos) =>
-      item.id === todo.id ? { ...item, status: newStatus } : item
-    );
-    setTodo(updatedTasks);
+    submit(
+      { todoId: todo.id, status: newStatus },
+      { method: "post", action: `update-status/${todo.id}` }
+    )
 
-    saveTodosToLocalStorage(updatedTasks);
+    // const storedTasks = getTodosFromLocalStorage();
+    // const updatedTasks = storedTasks.map((item: Todos) =>
+    //   item.id === todo.id ? { ...item, status: newStatus } : item
+    // );
+    // setTodo(updatedTasks);
+
+    // saveTodosToLocalStorage(updatedTasks);
   };
+
+  const handleDeleteTodo = () => {
+    const confirmFirst = confirm("Are you sure you want to delete this task?");
+    if (confirmFirst) {
+      submit(
+        todo.id,
+        { method: "post", action: `delete-todo/${todo.id}` }
+      )
+    }
+  }
 
   return (
     <div
@@ -64,7 +80,8 @@ export const TodosCard = ({ todo, setTodo, deleteTodo }: TodosProps) => {
             {/* Delete button - visible on hover */}
             <div className="flex flex-col gap-5">
               <button
-                onClick={() => deleteTodo(todo.id)}
+                onClick={handleDeleteTodo}
+                type="submit"
                 className={`flex-shrink-0 text-gray-400 hover:text-red-500 transition-colors ${isHovered ? 'opacity-100' : 'opacity-0'
                   }`}
               >
